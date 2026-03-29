@@ -301,6 +301,8 @@ class DesktopLyricWindow(QWidget):
         super().__init__()
         self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint | Qt.Tool)
         self.setAttribute(Qt.WA_TranslucentBackground)
+        self.setAttribute(Qt.WA_OpaquePaintEvent)  # 防止系统绘制默认背景
+        self.setStyleSheet("background: transparent; border: none;")  # 确保无边框
 
         self._sm = SettingsManager.instance()
         self.width_percentage = self._sm.width_percentage
@@ -479,10 +481,16 @@ class DesktopLyricWindow(QWidget):
         return current_idx
 
     def paintEvent(self, event):
+        # 始终用完全透明色清除背景，防止失焦时出现残留边框
+        painter = QPainter(self)
+        painter.setCompositionMode(QPainter.CompositionMode_Clear)
+        painter.fillRect(self.rect(), Qt.transparent)
+        painter.setCompositionMode(QPainter.CompositionMode_SourceOver)
+
         if self.playback_state == "Stopped" or (not self.current_title):
+            painter.end()
             return
 
-        painter = QPainter(self)
         painter.setRenderHint(QPainter.Antialiasing)
 
         current_idx = self.get_current_lyric_index()
