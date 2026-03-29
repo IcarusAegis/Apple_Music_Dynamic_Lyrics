@@ -4,6 +4,8 @@ Apple Music Dynamic Lyrics  — 苹果音乐动态歌词
 
 > 本软件是为了解决apple music 这么多年都没有动态歌词，以及没有歌词翻译的问题而开发的。
 
+目前仅支持Windows系统。
+
 ---
 
 ## 特色功能
@@ -202,3 +204,30 @@ apple_music_lyric/
 | **httpx** | 异步 HTTP 客户端，用于歌词 API 请求 |
 | **pycryptodome** | AES 加密，用于网易云音乐 API 签名 |
 | **PyInstaller** | 将程序打包为单文件 EXE（通过 `uv sync --extra build` 安装） |
+
+---
+
+## 许可证
+
+本项目采用 **GNU General Public License v3.0**（GNU GPL v3）开源，并附加以下条款：
+
+- **必须署名**：传播或再分发时，必须标注原作者 **IcarusAegis** 及项目地址
+- **禁止商业使用**：严禁出售、出租或作为商业产品的一部分收费
+- **相同方式共享**：修改后再发布必须采用相同许可证
+
+详细条款请参阅 [LICENSE](LICENSE) 文件。
+
+> **第三方组件许可证**
+>
+> | 组件 | 许可证 |
+> |------|--------|
+> | PySide6 (Qt6) | LGPL v3 |
+> | httpx | BSD 3-Clause |
+> | pycryptodome | BSD 2-Clause / Public Domain |
+> | winrt-windows-media-control | MIT |
+
+---
+
+# 其他
+欢迎提 Issue 。
+感谢 Linux.do 社区推动。
