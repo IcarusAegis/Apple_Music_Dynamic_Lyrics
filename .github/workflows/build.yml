@@ -1,0 +1,34 @@
+name: Build EXE
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Install uv
+        run: pip install uv
+
+      - name: Install dependencies
+        run: uv pip install httpx pycryptodome pyside6 winrt-windows-foundation winrt-windows-media-control pyinstaller
+
+      - name: Build with PyInstaller
+        run: uv run --no-project -m PyInstaller AppleMusicLyric.spec
+
+      - name: Upload to Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/AppleMusicLyric*.exe
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

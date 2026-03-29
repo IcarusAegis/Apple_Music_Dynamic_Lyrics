@@ -1,0 +1,24 @@
+# Python generated
+__pycache__/
+*.py[oc]
+build/
+dist/
+*.egg-info
+
+# Virtual environments
+.venv/
+
+# IDE
+.vscode/
+.idea/
+
+# Runtime data (用户生成，不应进入版本控制)
+lyrics_cache/
+offsets.json
+settings.json
+
+# Generated assets (由 icon.png 生成)
+icon.ico
+
+# Claude Code
+.claude/
