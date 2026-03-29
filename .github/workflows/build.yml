@@ -21,7 +21,7 @@ jobs:
         run: pip install uv
 
       - name: Install dependencies
-        run: uv pip install httpx pycryptodome pyside6 winrt-windows-foundation winrt-windows-media-control pyinstaller
+        run: uv pip install --system httpx pycryptodome pyside6 winrt-windows-foundation winrt-windows-media-control pyinstaller
 
       - name: Build with PyInstaller
         run: uv run --no-project -m PyInstaller AppleMusicLyric.spec
