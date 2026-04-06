@@ -336,10 +336,33 @@ class DesktopLyricWindow(QWidget):
         self.drag_pos = QPoint()
         self.is_hovered = False
         self.locked = False
+        self._hidden_by_user = False  # 用户主动隐藏标记
 
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.update)
         self.timer.start(50)
+
+    def hide_window(self):
+        """隐藏歌词窗口（保留程序运行）"""
+        self._hidden_by_user = True
+        self.hide()
+
+    def show_window(self):
+        """显示歌词窗口"""
+        self._hidden_by_user = False
+        self.show()
+        self.raise_()
+        try:
+            import ctypes
+            hwnd = int(self.winId())
+            ctypes.windll.user32.SetWindowPos(hwnd, -1, 0, 0, 0, 0, 0x0002 | 0x0001 | 0x0010)
+        except Exception:
+            pass
+
+    def closeEvent(self, event):
+        """窗口关闭按钮 -> 隐藏而非退出"""
+        event.ignore()
+        self.hide_window()
 
     def set_width_percentage(self, pct: int):
         if 10 <= pct <= 100:
@@ -504,6 +527,25 @@ class DesktopLyricWindow(QWidget):
                 self.rect(), Qt.AlignTop | Qt.AlignLeft,
                 f"拖拽移动 | Shift滚轮字号 | 滚轮+/-500ms(Ctrl 100ms) | 当前延迟:{self.lyric_offset_ms}ms | 托盘可锁定"
             )
+            # 右上角关闭按钮
+            btn_size = 22
+            btn_margin = 8
+            self._close_btn_rect = self.rect().adjusted(
+                self.width() - btn_size - btn_margin,
+                btn_margin,
+                -btn_margin,
+                -(self.height() - btn_size - btn_margin)
+            )
+            painter.setPen(Qt.NoPen)
+            painter.setBrush(QColor(80, 80, 80, 180))
+            painter.drawEllipse(self._close_btn_rect)
+            painter.setPen(QPen(Qt.white, 1.5))
+            # 画 X
+            r = self._close_btn_rect
+            cx, cy = r.x() + r.width() / 2, r.y() + r.height() / 2
+            s = r.width() / 2 * 0.6
+            painter.drawLine(int(cx - s), int(cy - s), int(cx + s), int(cy + s))
+            painter.drawLine(int(cx - s), int(cy + s), int(cx + s), int(cy - s))
 
         if not self.lyrics or current_idx == -1:
             main_text = "正在搜索歌词..." if not self.lyrics else "..."
@@ -565,6 +607,11 @@ class DesktopLyricWindow(QWidget):
 
     def mousePressEvent(self, event):
         if not self.locked and event.button() == Qt.LeftButton:
+            # 检测是否点击了关闭按钮
+            if hasattr(self, '_close_btn_rect') and self._close_btn_rect.contains(event.position().toPoint()):
+                self.hide_window()
+                event.accept()
+                return
             self.drag_pos = event.globalPosition().toPoint() - self.frameGeometry().topLeft()
             event.accept()
 
@@ -585,6 +632,8 @@ class DesktopLyricWindow(QWidget):
 
     def leaveEvent(self, event):
         self.is_hovered = False
+        if hasattr(self, '_close_btn_rect'):
+            del self._close_btn_rect
         self.update()
         super().leaveEvent(event)
 
@@ -795,7 +844,7 @@ class AboutDialog(QDialog):
         layout.addWidget(title_label)
 
         # 版本
-        version_label = QLabel("版本 0.1.0")
+        version_label = QLabel("版本 1.0.3")
         version_label.setStyleSheet("color: gray; font-size: 13px;")
         version_label.setAlignment(Qt.AlignCenter)
         layout.addWidget(version_label)
@@ -938,7 +987,7 @@ class SettingsDialog(QDialog):
         title_about.setAlignment(Qt.AlignCenter)
         about_layout.addWidget(title_about)
 
-        version_about = QLabel("版本 1.0.2")
+        version_about = QLabel("版本 1.0.3")
         version_about.setStyleSheet("color: gray; font-size: 13px;")
         version_about.setAlignment(Qt.AlignCenter)
         about_layout.addWidget(version_about)
@@ -1128,6 +1177,17 @@ def main():
 
     menu.addSeparator()
 
+    # --- 显示 / 隐藏歌词 ---
+    action_show = QAction("显示歌词", menu)
+    action_show.triggered.connect(window.show_window)
+    action_hide = QAction("暂时关闭歌词", menu)
+    action_hide.triggered.connect(window.hide_window)
+
+    menu.addAction(action_hide)
+    menu.addAction(action_show)
+
+    menu.addSeparator()
+
     # --- 关于 ---
     action_about = QAction("关于...", menu)
     action_about.triggered.connect(lambda: AboutDialog().exec())
@@ -1147,6 +1207,9 @@ def main():
 
     tray.setContextMenu(menu)
     tray.show()
+
+    # 点击托盘图标 -> 显示歌词窗口
+    tray.activated.connect(lambda reason: window.show_window() if reason == QSystemTrayIcon.ActivationReason.Trigger else None)
 
     sys.exit(app.exec())
 
