@@ -844,7 +844,7 @@ class AboutDialog(QDialog):
         layout.addWidget(title_label)
 
         # 版本
-        version_label = QLabel("版本 1.0.3")
+        version_label = QLabel("版本 1.0.4")
         version_label.setStyleSheet("color: gray; font-size: 13px;")
         version_label.setAlignment(Qt.AlignCenter)
         layout.addWidget(version_label)
@@ -987,7 +987,7 @@ class SettingsDialog(QDialog):
         title_about.setAlignment(Qt.AlignCenter)
         about_layout.addWidget(title_about)
 
-        version_about = QLabel("版本 1.0.3")
+        version_about = QLabel("版本 1.0.4")
         version_about.setStyleSheet("color: gray; font-size: 13px;")
         version_about.setAlignment(Qt.AlignCenter)
         about_layout.addWidget(version_about)
